@@ -1,5 +1,6 @@
 import subprocess
 from pathlib import Path
+from typing import Optional
 
 from .consts import ROOT_PATH
 from .log import logger
@@ -11,7 +12,7 @@ def is_venv(path: Path) -> bool:
 
 def list_envs():
     """list all envs"""
-    logger.info(f'List {ROOT_PATH}')
+    logger.info(f'list {ROOT_PATH}')
 
     items = (f'  {it.name}' for it in ROOT_PATH.glob('*') if it.is_dir() and is_venv(it))
     print('Available envs:')
@@ -20,7 +21,11 @@ def list_envs():
 
 def activate(name: str):
     """activate an existing env"""
+    if not isinstance(name, str):
+        name = str(name)
+
     venv_path = ROOT_PATH / name
+
     if not venv_path.exists():
         logger.error(f'not found: {name}')
     else:
@@ -32,8 +37,11 @@ def activate(name: str):
 # If you want to pass a numerical str, you should obey Python syntax.
 # e.g. '3.10' instead of 3.10, where the latter will be interpreted as
 # a float value 3.1
-def create(name: str, *, version: str = '', overwrite: bool = False):
+def create(name: str, *, version: Optional[str] = None, overwrite: bool = False):
     """create a new env"""
+    if not isinstance(name, str):
+        name = str(name)
+
     venv_path = ROOT_PATH / name
 
     if venv_path.exists() and not overwrite:
@@ -46,7 +54,7 @@ def create(name: str, *, version: str = '', overwrite: bool = False):
         '--no-wheel',
         # '--system-site-packages'
     ]
-    if version != '':
+    if version is not None:
         config.append(f'--python {version}')
     config = ' '.join(config)
 
@@ -61,6 +69,9 @@ def create(name: str, *, version: str = '', overwrite: bool = False):
 
 def remove(name: str):
     """remove an existing env"""
+    if not isinstance(name, str):
+        name = str(name)
+
     venv_path = ROOT_PATH / name
 
     if not venv_path.exists():
