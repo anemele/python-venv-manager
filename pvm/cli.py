@@ -6,7 +6,15 @@ import click
 from .jobs import activate, create, list_envs, remove
 
 
-@click.group()
+# https://github.com/pallets/click/issues/513#issuecomment-504158316
+# https://zhuanlan.zhihu.com/p/73426505
+# requires v3.6+
+class OrderedGroup(click.Group):
+    def list_commands(self, _) -> list[str]:
+        return list(self.commands.keys())
+
+
+@click.group(cls=OrderedGroup)
 def cli():
     '''Python Virtual env Manager'''
 
@@ -14,18 +22,6 @@ def cli():
 @cli.command(help=list_envs.__doc__)
 def ls():
     list_envs()
-
-
-@cli.command(help=activate.__doc__)
-@click.argument('name')
-def use(name: str):
-    activate(name)
-
-
-@cli.command(help=remove.__doc__)
-@click.argument('name')
-def rm(name: str):
-    remove(name)
 
 
 @cli.command(help=create.__doc__)
@@ -36,3 +32,15 @@ def add(name: str, version: Optional[str], force: bool):
     logger.debug(f'{version=}')
     logger.debug(f'{force=}')
     create(name, version=version, overwrite=force)
+
+
+@cli.command(help=remove.__doc__)
+@click.argument('name')
+def rm(name: str):
+    remove(name)
+
+
+@cli.command(help=activate.__doc__)
+@click.argument('name')
+def use(name: str):
+    activate(name)
