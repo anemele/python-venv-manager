@@ -33,10 +33,6 @@ def activate(name: str):
         subprocess.run(f'start cmd /k {bat}', shell=True)
 
 
-# ** NOTICE ** #
-# If you want to pass a numerical str, you should obey Python syntax.
-# e.g. '3.10' instead of 3.10, where the latter will be interpreted as
-# a float value 3.1
 def create(name: str, *, version: Optional[str] = None, overwrite: bool = False):
     """create a new env"""
     if not isinstance(name, str):
