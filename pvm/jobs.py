@@ -48,7 +48,9 @@ def create(name: str, *, version: Optional[str] = None, overwrite: bool = False)
         '--activators batch,powershell',
         '--no-setuptools',
         '--no-wheel',
-        # '--system-site-packages'
+        # '--system-site-packages',
+        '--no-vcs-ignore',
+        # '--no-pip',
     ]
     if version is not None:
         config.append(f'--python {version}')
