@@ -1,6 +1,5 @@
-import subprocess
+import subprocess as sbp
 from pathlib import Path
-from typing import Optional
 
 from .consts import ROOT_PATH
 from .log import logger
@@ -12,9 +11,10 @@ def is_venv(path: Path) -> bool:
 
 def list_envs():
     """list all envs"""
-    logger.info(f'list {ROOT_PATH}')
+    root = str(ROOT_PATH).replace(str(Path.home()), '~', 1)
+    logger.info(f'list {root}')
 
-    items = (f'  {it.name}' for it in ROOT_PATH.glob('*') if it.is_dir() and is_venv(it))
+    items = (f'  {it.name}' for it in ROOT_PATH.glob('*') if is_venv(it))
     print('Available envs:')
     print('\n'.join(items))
 
@@ -30,10 +30,10 @@ def activate(name: str):
         logger.error(f'not found: {name}')
     else:
         bat = venv_path / 'Scripts/activate.bat'
-        subprocess.run(f'start cmd /k {bat}', shell=True)
+        sbp.run(f'start cmd /k {bat}', shell=True)
 
 
-def create(name: str, *, version: Optional[str] = None, overwrite: bool = False):
+def create(name: str, *, version: str | None = None, overwrite: bool = False):
     """create a new env"""
     if not isinstance(name, str):
         name = str(name)
@@ -57,7 +57,7 @@ def create(name: str, *, version: Optional[str] = None, overwrite: bool = False)
     config = ' '.join(config)
 
     cmd = f"virtualenv {venv_path} {config}"
-    ret = subprocess.run(cmd).returncode
+    ret = sbp.run(cmd).returncode
     if ret != 0:
         logger.error(f'failed to create: {name}')
         exit(ret)
@@ -80,7 +80,7 @@ def remove(name: str):
         exit(1)
 
     try:
-        cp = subprocess.run(f'rd /s /q {venv_path}', shell=True)
+        cp = sbp.run(f'rd /s /q {venv_path}', shell=True)
         if cp.returncode == 0:
             logger.info(f'removed env: {name}')
         else:
