@@ -9,7 +9,7 @@ from .core import activate, create, list_envs, remove
 # https://zhuanlan.zhihu.com/p/73426505
 # requires v3.6+
 class OrderedGroup(click.Group):
-    def list_commands(self, _):
+    def list_commands(self, _):  # type: ignore
         return self.commands.keys()
 
 
@@ -24,22 +24,24 @@ def ls():
 
 
 @cli.command(help=create.__doc__)
-@click.argument('name')
-@click.option('-v', '--version', help='specify the Python version (preinstalled)')
-@click.option('-f', '--force', is_flag=True, help='overwrite if exists')
+@click.argument("name")
+@click.option("-v", "--version", help="specify the Python version (preinstalled)")
+@click.option("-f", "--force", is_flag=True, help="overwrite if exists")
 def add(name: str, version: str | None, force: bool):
-    logger.debug(f'{version=}')
-    logger.debug(f'{force=}')
+    logger.debug(f"{version=}")
+    logger.debug(f"{force=}")
     create(name, version=version, overwrite=force)
 
 
 @cli.command(help=remove.__doc__)
-@click.argument('name')
+@click.argument("name")
 def rm(name: str):
     remove(name)
 
 
 @cli.command(help=activate.__doc__)
-@click.argument('name')
-def use(name: str):
-    activate(name)
+@click.argument("name")
+@click.option("--pwsh", is_flag=True, help="use pwsh activator")
+def use(name: str, pwsh: bool):
+    logger.debug(f"{pwsh=}")
+    activate(name, pwsh)
