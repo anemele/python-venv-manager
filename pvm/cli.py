@@ -1,8 +1,7 @@
-from venv import logger
-
 import click
 
 from .core import activate, create, list_envs, remove
+from .log import logger
 
 
 # https://github.com/pallets/click/issues/513#issuecomment-504158316
