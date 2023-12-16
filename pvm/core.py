@@ -14,9 +14,9 @@ def list_envs():
     root = str(ROOT_PATH).replace(str(Path.home()), "~", 1)
     logger.info(f"list {root}")
 
-    items = (f"  {it.name}" for it in ROOT_PATH.glob("*") if is_venv(it))
+    items = "".join(f"  {it.name:<10s}" for it in ROOT_PATH.glob("*") if is_venv(it))
     print("Available envs:")
-    print("\n".join(items))
+    print(items)
 
 
 def activate(name: str, use_pwsh: bool):
