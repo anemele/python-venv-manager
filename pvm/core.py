@@ -1,12 +1,15 @@
+import shutil
 import subprocess as sbp
 from pathlib import Path
 
 from .consts import ROOT_PATH
 from .log import logger
 
+BIN_DIR = "Scripts"
+
 
 def is_venv(path: Path) -> bool:
-    return (path / "pyvenv.cfg").exists() and (path / "Scripts").exists()
+    return (path / "pyvenv.cfg").exists() and (path / BIN_DIR).exists()
 
 
 def list_envs():
@@ -21,31 +24,25 @@ def list_envs():
 
 def activate(name: str, use_pwsh: bool):
     """activate an existing env"""
-    if not isinstance(name, str):
-        name = str(name)
-
     venv_path = ROOT_PATH / name
 
-    if not venv_path.exists():
+    if not is_venv(venv_path):
         logger.error(f"not found: {name}")
     elif use_pwsh:
-        act = venv_path / "Scripts/activate.ps1"
+        act = venv_path / BIN_DIR / "activate.ps1"
         sbp.run(f"start pwsh -NoExit -Command {act}", shell=True)
     else:
-        act = venv_path / "Scripts/activate.bat"
+        act = venv_path / BIN_DIR / "activate.bat"
         sbp.run(f"start cmd /k {act}", shell=True)
 
 
 def create(name: str, *, version: str | None = None, overwrite: bool = False):
     """create a new env"""
-    if not isinstance(name, str):
-        name = str(name)
-
     venv_path = ROOT_PATH / name
 
     if venv_path.exists() and not overwrite:
         logger.error(f"existing env: {name}")
-        exit(1)
+        return
 
     config = [
         "--activators batch,powershell",
@@ -60,33 +57,24 @@ def create(name: str, *, version: str | None = None, overwrite: bool = False):
     config = " ".join(config)
 
     cmd = f"virtualenv {venv_path} {config}"
-    ret = sbp.run(cmd).returncode
-    if ret != 0:
+    if sbp.run(cmd).returncode != 0:
         logger.error(f"failed to create: {name}")
-        exit(ret)
+        return
 
-    (venv_path / "Scripts/idle.bat").write_text("@call %~dp0python.exe -m idlelib %*")
+    # idle for Windows
+    (venv_path / BIN_DIR / "idle.bat").write_text("@call %~dp0python.exe -m idlelib %*")
 
 
 def remove(name: str):
     """remove an existing env"""
-    if not isinstance(name, str):
-        name = str(name)
-
     venv_path = ROOT_PATH / name
 
-    if not venv_path.exists():
-        logger.error(f"not found: {name}")
-        exit(1)
     if not is_venv(venv_path):
-        logger.error(f"invalid env: {name}")
-        exit(1)
+        logger.error(f"not an env: {name}")
+        return
 
     try:
-        cp = sbp.run(f"rd /s /q {venv_path}", shell=True)
-        if cp.returncode == 0:
-            logger.info(f"removed env: {name}")
-        else:
-            logger.error(f"failed to remove: {name}")
+        shutil.rmtree(venv_path)
+        logger.info(f"removed env: {name}")
     except Exception as e:
         logger.error(e)
