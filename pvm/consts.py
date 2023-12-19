@@ -12,5 +12,5 @@ if PYTHON_VENV_PATH is None:
 
 ROOT_PATH = Path(PYTHON_VENV_PATH)
 if not ROOT_PATH.exists():
-    logger.error(f'no exists: {ROOT_PATH}')
-    exit(1)
+    logger.warning(f'not exists, mkdir: {ROOT_PATH}')
+    ROOT_PATH.mkdir(parents=True)

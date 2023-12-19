@@ -44,7 +44,7 @@ def rm(name: tuple[str]):
 
 @cli.command(help=activate.__doc__)
 @click.argument("name", nargs=-1, required=True)
-@click.option("--pwsh", is_flag=True, help="use pwsh activator")
+@click.option("--pwsh", is_flag=True, default=False, help="use pwsh activator")
 def use(name: tuple[str], pwsh: bool):
     logger.debug(f"{name=}")
     logger.debug(f"{pwsh=}")
